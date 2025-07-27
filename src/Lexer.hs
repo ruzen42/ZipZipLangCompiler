@@ -2,7 +2,6 @@ module Lexer (Token(..), lexer) where
 
 import Text.Parsec
 import Text.Parsec.String 
-import Text.Parsec.Char
 import Control.Monad 
 
 data Token
@@ -79,15 +78,13 @@ identifierParser = do
   if s `elem` keywords || s `elem` typeNames
     then fail "Keyword or type used as identifier"
     else return $ TIdentifier s pos
-  where
-    identifier = (:) <$> letter <*> many (alphaNum <|> char '_')
 
 stringParser :: Parser Token
 stringParser = do
   pos <- getPosition
-  char '"'
+  _ <- char '"'
   s <- many (noneOf "\"" <|> (char '\\' *> char '"'))
-  char '"'
+  _ <- char '"'
   return $ TString s pos
 
 numberParser :: Parser Token

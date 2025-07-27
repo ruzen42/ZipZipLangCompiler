@@ -1,5 +1,7 @@
 name Main
 
+import Std.Text.ToText
+
 main {
   print ("Hello World") ++ toText (square (5)) ++ toText (xor (True True)) // False 
   print "Hello ZZipLang" // Error 

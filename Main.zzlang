@@ -1,0 +1,15 @@
+name Main
+
+main {
+  print ("Hello World") ++ toText (square (5)) ++ toText (xor (True True)) // False 
+  print "Hello ZZipLang" // Error 
+}
+
+/*
+  это одно и тоже
+  main { print "hello"} 
+  main = print "hello" 
+*/
+
+square a: Num -> Num = a * a 
+xor a: Logic, b: Logic -> Logic = if a == b then False else True

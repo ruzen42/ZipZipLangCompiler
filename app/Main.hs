@@ -5,13 +5,17 @@ import Options.Applicative
 data Options = Options 
   { srcFiles    :: [String]
   , verboseMode :: Bool 
+  , onlyLexer   :: Bool 
+  , onlyParse   :: Bool 
   , outputName  :: String 
-  }
+  } deriving (Show)
 
 optionsParser :: Parser Options
 optionsParser = Options
   <$> some (argument str (metavar "SRC_FILES..." <> help "Source files to compile"))
   <*> switch (long "verbose" <> short 'v' <> help "Enable verbose mode")
+  <*> switch (long "only-lexer" <> short 'l' <> help "Lexing files")
+  <*> switch (long "only-parse" <> short 'p' <> help "Parsing files")
   <*> strOption
         ( long "output"
         <> short 'o'
@@ -23,7 +27,7 @@ optionsParser = Options
 main :: IO ()
 main = do 
   opts <- execParser optsInfo 
-  putStrLn $ "Compile: " ++ show (srcFiles opts) ++ "\nWith Verbose Mode: " ++ show (verboseMode opts) ++ "\nOutput FileName: " ++ show (outputName opts)  
+  print opts
 
 optsInfo :: ParserInfo Options
 optsInfo = info (optionsParser <**> helper)

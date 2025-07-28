@@ -7,17 +7,35 @@ import Text.Parsec
 data Options = Options 
   { srcFiles    :: [String]
   , verboseMode :: Bool 
-  , onlyLexer   :: Bool 
+  , lexing   :: Bool 
   , onlyParse   :: Bool 
   , outputName  :: String 
   } deriving (Show)
+
+main :: IO ()
+main = do 
+  opts <- execParser optsInfo 
+  let filepath :: FilePath 
+      filepath = srcFiles opts !! 0                        
+  contents <- readFile filepath 
+  if lexing opts then 
+    print $ lexing contents
+  else return ()
+
+FileLexing :: String -> String
+FileLexing contents = do
+    case parse lexer "main" contents of
+      Left err -> show err
+      Right ts -> show ts
+
+optsInfo :: ParserInfo Options
 
 optionsParser :: Parser Options
 optionsParser = Options
   <$> some (argument str (metavar "SRC_FILES..." <> help "Source files to compile"))
   <*> switch (long "verbose" <> short 'v' <> help "Enable verbose mode")
-  <*> switch (long "only-lexer" <> short 'l' <> help "Lexing files")
-  <*> switch (long "only-parse" <> short 'p' <> help "Parsing files")
+  <*> switch (long "lexer" <> short 'l' <> help "Print lexing files")
+  <*> switch (long "parse" <> short 'p' <> help "Parsing files")
   <*> strOption
         ( long "output"
         <> short 'o'
@@ -26,16 +44,6 @@ optionsParser = Options
         <> help "Name of the output executable"
         )
 
-main :: IO ()
-main = do 
-  opts <- execParser optsInfo 
-  let input = "name Main\n// Comment\n/* Multi-line */\nmain { print (\"Hello World\") ++ toText (square (5)) }"
-  case parse lexer "test.zzlang" input of
-    Left err -> print err
-    Right tokens -> mapM_ print tokens
-  print opts
-
-optsInfo :: ParserInfo Options
 optsInfo = info (optionsParser <**> helper)
   ( fullDesc
   <> progDesc "Compile your zzlang files"

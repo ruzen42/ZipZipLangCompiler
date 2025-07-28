@@ -91,7 +91,7 @@ numberParser :: Parser Token
 numberParser = do
   pos <- getPosition
   digits <- many1 digit
-  frac <- option "" ((:) <$> char '.' <*> many1 digit)
+  frac <- option "" (liftM2 (:) (char '.') (many1 digit))
   return $ TNumber (read (digits ++ frac)) pos
 
 operatorParser :: Parser Token

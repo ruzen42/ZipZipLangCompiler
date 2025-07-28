@@ -1,6 +1,8 @@
 module Main (main) where
 
 import Options.Applicative
+import Lexer 
+import Text.Parsec 
 
 data Options = Options 
   { srcFiles    :: [String]
@@ -27,6 +29,10 @@ optionsParser = Options
 main :: IO ()
 main = do 
   opts <- execParser optsInfo 
+  let input = "name Main\n// Comment\n/* Multi-line */\nmain { print (\"Hello World\") ++ toText (square (5)) }"
+  case parse lexer "test.zzlang" input of
+    Left err -> print err
+    Right tokens -> mapM_ print tokens
   print opts
 
 optsInfo :: ParserInfo Options

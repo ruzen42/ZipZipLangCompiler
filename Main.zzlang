@@ -1,8 +1,4 @@
-name Main
+name Main 
 
-
-main {
-  print ("Hello World") ++ toText (square (5)) ++ toText (xor (True True)) 
-  print "Hello ZZipLang" 
-}
+main = print ("Hello world")
 

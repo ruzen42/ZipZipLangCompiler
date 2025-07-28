@@ -3,6 +3,8 @@ module Main (main) where
 import Options.Applicative
 import Lexer 
 import Text.Parsec 
+import Control.Monad (when)
+import Compiler 
 
 data Options = Options 
   { srcFiles    :: [String]
@@ -15,18 +17,12 @@ data Options = Options
 main :: IO ()
 main = do 
   opts <- execParser optsInfo 
-  let filepath :: FilePath 
-      filepath = srcFiles opts !! 0                        
-  contents <- readFile filepath 
-  if lexing opts then 
-    print $ lexing contents
-  else return ()
+  contents <- readFile (srcFiles opts !! 0)
+  putStrLn $ compile contents
+  when (lexing opts) $ print $ fileLexing contents
 
-FileLexing :: String -> String
-FileLexing contents = do
-    case parse lexer "main" contents of
-      Left err -> show err
-      Right ts -> show ts
+fileLexing :: String -> String
+fileLexing contents = either show show $ parse lexer "main" contents
 
 optsInfo :: ParserInfo Options
 

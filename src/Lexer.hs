@@ -8,7 +8,7 @@ data Token
   = TKeyword String SourcePos
   | TIdentifier String SourcePos
   | TString String SourcePos
-  | TNumber Integer SourcePos
+  | TNumber Double SourcePos  -- Изменено на Double для поддержки дробных чисел
   | TBoolean String SourcePos
   | TOperator String SourcePos
   | TPunctuation Char SourcePos
@@ -22,29 +22,21 @@ typeNames :: [String]
 typeNames = ["Num", "Logic", "Text"]
 
 lexer :: Parser [Token]
-lexer = whiteSpace *> many (tokenParser <* whiteSpace) <* eof
+lexer = spaces *> many (tokenParser <* spaces) <* eof  -- Добавлена обработка пробелов
 
 identifier :: Parser String
 identifier = (:) <$> letter <*> many (alphaNum <|> char '_')
 
-whiteSpace :: Parser ()
-whiteSpace = void $ many (simpleWhitespace <|> singleLineComment <|> multiLineComment)
-  where
-    simpleWhitespace = void $ oneOf " \t\n\r"
-    singleLineComment = string "//" *> skipMany (noneOf "\n") <* char '\n'
-    multiLineComment = void $ string "/*" *> skipMultiLineComment
-    skipMultiLineComment = try (string "*/") <|> (anyChar *> skipMultiLineComment)
-
 tokenParser :: Parser Token
 tokenParser = choice
-  [ keywordParser
-  , typeParser
-  , booleanParser
-  , identifierParser
-  , stringParser
-  , numberParser
-  , operatorParser
-  , punctuationParser
+  [ try keywordParser
+  , try typeParser    
+  , try booleanParser  
+  , try identifierParser
+  , try stringParser    
+  , try numberParser     
+  , try operatorParser     
+  , punctuationParser     
   ]
 
 keywordParser :: Parser Token
@@ -53,6 +45,7 @@ keywordParser = do
   s <- try $ do
     s <- identifier
     guard (s `elem` keywords)
+    notFollowedBy (alphaNum <|> char '_')  
     return s
   return $ TKeyword s pos
 
@@ -62,28 +55,32 @@ typeParser = do
   s <- try $ do
     s <- identifier 
     guard (s `elem` typeNames)
+    notFollowedBy (alphaNum <|> char '_')  
     return s
   return $ TType s pos
 
 booleanParser :: Parser Token
 booleanParser = do
   pos <- getPosition
-  s <- string "True" <|> string "False"
+  s <- try $ do
+    s <- string "True" <|> string "False"
+    notFollowedBy (alphaNum <|> char '_')  
+    return s
   return $ TBoolean s pos
 
 identifierParser :: Parser Token
 identifierParser = do
   pos <- getPosition
   s <- identifier
-  if s `elem` keywords || s `elem` typeNames
-    then fail "Keyword or type used as identifier"
-    else return $ TIdentifier s pos
+  return $ TIdentifier s pos
 
 stringParser :: Parser Token
 stringParser = do
   pos <- getPosition
   _ <- char '"'
-  s <- many (noneOf "\"" <|> (char '\\' *> char '"'))
+  s <- many (try (string "\\\"" >> return '"') <|>  
+            try (char '\\' >> anyChar >>= \c -> return c) <|>  
+            noneOf "\"")  
   _ <- char '"'
   return $ TString s pos
 
@@ -92,12 +89,13 @@ numberParser = do
   pos <- getPosition
   digits <- many1 digit
   frac <- option "" (liftM2 (:) (char '.') (many1 digit))
-  return $ TNumber (read (digits ++ frac)) pos
+  let numStr = digits ++ frac
+  return $ TNumber (read numStr) pos
 
 operatorParser :: Parser Token
 operatorParser = do
   pos <- getPosition
-  op <- choice (map string ["++", "+", "*", "==", "->"])
+  op <- choice (map (try . string) ["++", "==", "->", "+", "*"])
   return $ TOperator op pos
 
 punctuationParser :: Parser Token
@@ -105,4 +103,3 @@ punctuationParser = do
   pos <- getPosition
   c <- oneOf "(){},=:"
   return $ TPunctuation c pos
-

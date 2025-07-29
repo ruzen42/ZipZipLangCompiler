@@ -16,7 +16,7 @@ data Token
   deriving (Show, Eq)
 
 keywords :: [String]
-keywords = ["name", "main", "if", "then", "else", "use", "case", "bind"] 
+keywords = ["module", "main", "if", "then", "else", "use", "case", "bind"] 
 
 typeNames :: [String]
 typeNames = ["Num", "Logic", "Text"]

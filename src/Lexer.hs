@@ -16,7 +16,7 @@ data Token
   deriving (Show, Eq)
 
 keywords :: [String]
-keywords = ["module", "main", "if", "then", "else", "use", "case", "bind"] 
+keywords = ["module", "main", "if", "then", "else", "use", "case", "zip"] 
 
 typeNames :: [String]
 typeNames = ["Num", "Logic", "Text"]
@@ -95,7 +95,7 @@ numberParser = do
 operatorParser :: Parser Token
 operatorParser = do
   pos <- getPosition
-  op <- choice (map (try . string) ["++", "==", "::", "&&", "", "->", "+", "*", "/", "$", "@"])
+  op <- choice (map (try . string) ["++", "==", "::", "&&", "?", "->", "+", "*", "/", "$", "@"])
   return $ TOperator op pos
 
 punctuationParser :: Parser Token

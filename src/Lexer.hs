@@ -8,7 +8,7 @@ data Token
   = TKeyword String SourcePos
   | TIdentifier String SourcePos
   | TString String SourcePos
-  | TNumber Double SourcePos  -- Изменено на Double для поддержки дробных чисел
+  | TNumber Double SourcePos  
   | TBoolean String SourcePos
   | TOperator String SourcePos
   | TPunctuation Char SourcePos
@@ -16,13 +16,13 @@ data Token
   deriving (Show, Eq)
 
 keywords :: [String]
-keywords = ["name", "main", "if", "then", "else"] 
+keywords = ["name", "main", "if", "then", "else", "use", "case", "bind"] 
 
 typeNames :: [String]
 typeNames = ["Num", "Logic", "Text"]
 
 lexer :: Parser [Token]
-lexer = spaces *> many (tokenParser <* spaces) <* eof  -- Добавлена обработка пробелов
+lexer = spaces *> many (tokenParser <* spaces) <* eof  
 
 identifier :: Parser String
 identifier = (:) <$> letter <*> many (alphaNum <|> char '_')
@@ -95,11 +95,11 @@ numberParser = do
 operatorParser :: Parser Token
 operatorParser = do
   pos <- getPosition
-  op <- choice (map (try . string) ["++", "==", "->", "+", "*"])
+  op <- choice (map (try . string) ["++", "==", "::", "&&", "", "->", "+", "*", "/", "$", "@"])
   return $ TOperator op pos
 
 punctuationParser :: Parser Token
 punctuationParser = do
   pos <- getPosition
-  c <- oneOf "(){},=:"
+  c <- oneOf "(){},=:."
   return $ TPunctuation c pos

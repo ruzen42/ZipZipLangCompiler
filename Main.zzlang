@@ -1,4 +1,12 @@
 name Main 
 
-main = print ("Hello world")
+// this a comment
+/*
+  this also
+*/
+square Num a -> Num = a * a
+main {
+    print ("Hello world") 
+    print (toText (square 5))
+}
 

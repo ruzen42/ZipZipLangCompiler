@@ -19,7 +19,7 @@ keywords :: [String]
 keywords = ["module", "main", "if", "then", "else", "use", "case", "zip"] 
 
 typeNames :: [String]
-typeNames = ["Num", "Logic", "Text"]
+typeNames = ["Num", "Logic", "Text", "ZippedText"]
 
 lexer :: Parser [Token]
 lexer = spaces *> many (tokenParser <* spaces) <* eof  

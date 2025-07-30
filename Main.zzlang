@@ -4,6 +4,7 @@ name Main
 /*
   this also
 */
+let
 square Num a -> Num = a * a
 main {
     print ("Hello world") 

@@ -1,8 +1,6 @@
 module Main (main) where
 
 import Options.Applicative
-import Lexer 
-import Text.Parsec 
 import Control.Monad (when)
 import Compiler 
 
@@ -19,10 +17,8 @@ main = do
   opts <- execParser optsInfo 
   contents <- readFile (srcFiles opts !! 0)
   putStrLn $ compile contents
-  when (lexing opts) $ print $ fileLexing contents
+  when (lexing opts) $ putStrLn $ printLexer contents
 
-fileLexing :: String -> String
-fileLexing contents = either show show $ parse lexer "main" contents
 
 optsInfo :: ParserInfo Options
 
@@ -36,12 +32,12 @@ optionsParser = Options
         ( long "output"
         <> short 'o'
         <> metavar "OUTPUT_NAME"
-        <> value "a.out"
+        <> value "Main"
         <> help "Name of the output executable"
         )
 
 optsInfo = info (optionsParser <**> helper)
   ( fullDesc
-  <> progDesc "Compile your zzlang files"
-  <> header "zzc - The ZZ Language Compiler"
+  <> progDesc "ZZlang compiler"
+  <> header "zzc - The ZipZipLang Compiler"
   )

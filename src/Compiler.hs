@@ -6,8 +6,8 @@ import Lexer
 compile, printLexer :: String -> String 
 
 compile input = 
-    lexingString $ case preprocess of
-                      Right -> r
+  either (("Error: " ++) . show) show $
+    preprocess input >>= lexingString 
 
 printLexer input = 
   either (("Lexer error: " ++) . show) show $

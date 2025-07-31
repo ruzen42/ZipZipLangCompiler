@@ -34,11 +34,8 @@ typeNames = ["Num", "Logic", "Text", "ZippedText"]
 lexer :: Parser [Token]
 lexer = spaces *> many (tokenParser <* spaces) <* eof  
 
-lexTokens :: String -> Either ParseError [Token]
-lexTokens = parse lexer "lexer"
-
-lexingString :: String -> String 
-lexingString = either (("Lexer error: " ++) . show) show . lexTokens
+lexingString :: String -> Either ParseError [Token]
+lexingString = parse lexer "lexer"
 
 identifier :: Parser String
 identifier = (:) <$> letter <*> many (alphaNum <|> char '_')

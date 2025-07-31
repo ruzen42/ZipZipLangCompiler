@@ -13,13 +13,13 @@ preprocessor = concat <$> many (try singleLineComment <|>
                                otherChar)
   where
     singleLineComment = do
-      string "//"
-      manyTill anyChar (try (char '\n') <|> (eof >> return '\n'))
+      _ <- string "//"
+      _ <- manyTill anyChar (try (char '\n') <|> (eof >> return '\n'))
       return "\n"
     
     multiLineComment = do
-      string "/*"
-      manyTill anyChar (try (string "*/"))
+      _ <- string "/*"
+      _ <- manyTill anyChar (try (string "*/"))
       return ""
     
     stringLiteral = do

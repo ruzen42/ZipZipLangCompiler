@@ -1,4 +1,4 @@
-module Lexer (Token(..), lexer) where
+module Lexer (Token(..), lexingString) where
 
 import Text.Parsec
 import Text.Parsec.String 
@@ -13,7 +13,17 @@ data Token
   | TOperator String SourcePos
   | TPunctuation Char SourcePos
   | TType String SourcePos
-  deriving (Show, Eq)
+  deriving (Eq)
+
+instance Show Token where
+  show (TKeyword s _) = "Keyword: " ++ s
+  show (TIdentifier s _) = "Identifier: " ++ s
+  show (TString s _) = "String: \"" ++ s ++ "\""
+  show (TNumber n _) = "Number: " ++ show n
+  show (TBoolean s _) = "Boolean: " ++ s
+  show (TOperator s _) = "Operator: " ++ s
+  show (TPunctuation c _) = "Punctuation: " ++ [c]
+  show (TType s _) = "Type: " ++ s
 
 keywords :: [String]
 keywords = ["module", "main", "if", "then", "else", "use", "case", "zip"] 
@@ -23,6 +33,12 @@ typeNames = ["Num", "Logic", "Text", "ZippedText"]
 
 lexer :: Parser [Token]
 lexer = spaces *> many (tokenParser <* spaces) <* eof  
+
+lexTokens :: String -> Either ParseError [Token]
+lexTokens = parse lexer "lexer"
+
+lexingString :: String -> String 
+lexingString = either (("Lexer error: " ++) . show) show . lexTokens
 
 identifier :: Parser String
 identifier = (:) <$> letter <*> many (alphaNum <|> char '_')

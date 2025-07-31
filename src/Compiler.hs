@@ -2,19 +2,13 @@ module Compiler (compile, printLexer) where
 
 import Preprocessor
 import Lexer 
-import Text.Parsec (parse)
 
-compile :: String -> String 
+compile, printLexer :: String -> String 
+
 compile input = 
-  case preprocess input of
-    Left err -> "Preprocessor error: " ++ show err
-    Right preprocessed -> 
-      case parse lexer "lexer" preprocessed of
-        Left err -> "Lexer error: " ++ show err  
-        Right tokens -> show tokens
+    lexingString $ case preprocess of
+                      Right -> r
 
-printLexer :: String -> String 
 printLexer input = 
-  case parse lexer "lexer" input of
-    Left err -> "Lexer error: " ++ show err  
-    Right tokens -> show tokens
+  either (("Lexer error: " ++) . show) show $
+    lexingString input

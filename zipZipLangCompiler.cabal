@@ -29,7 +29,6 @@ library
       AST
       Compiler
       Lexer
-      Parser
       Preprocessor
   other-modules:
       Paths_zipZipLangCompiler

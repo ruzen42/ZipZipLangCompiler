@@ -1,4 +1,5 @@
 # ZipZipLang Compiler
+<img width="300" height="300" alt="logo" src="logo.png" />
 
 Компилятор для языка программирования ZipZipLang, разработанный на Haskell.
 

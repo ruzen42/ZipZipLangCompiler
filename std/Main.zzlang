@@ -1,0 +1,13 @@
+name Main 
+
+// this a comment
+/*
+  this also
+*/
+let
+square Num a -> Num = a * a
+main {
+    print ("Hello world") 
+    print (toText (square 5))
+}
+

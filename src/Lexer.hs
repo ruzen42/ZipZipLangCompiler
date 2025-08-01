@@ -8,7 +8,7 @@ data Token
   = TKeyword String SourcePos
   | TIdentifier String SourcePos
   | TString String SourcePos
-  | TNumber Double SourcePos  
+  | TNumber Integer SourcePos  
   | TBoolean String SourcePos
   | TOperator String SourcePos
   | TPunctuation Char SourcePos

@@ -26,8 +26,10 @@ source-repository head
 
 library
   exposed-modules:
+      AST
       Compiler
       Lexer
+      Parser
       Preprocessor
   other-modules:
       Paths_zipZipLangCompiler

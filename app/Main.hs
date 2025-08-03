@@ -4,6 +4,7 @@ import Options.Applicative
 import Control.Monad (when)
 import Compiler 
 import Control.Exception
+import System.Console.ANSI
 
 data Options = Options 
   { srcFiles    :: [String]
@@ -13,8 +14,12 @@ data Options = Options
   , outputName  :: String 
   } deriving (Show)
 
-genErrorString :: String -> String
-genErrorString s = "\033[0;31mError: " ++ s
+printErr :: String -> IO ()
+printErr s = do 
+  setSGR [SetColor Foreground Vivid Red] 
+  putStr "Error: "
+  setSGR [Reset] 
+  putStrLn s
 
 main :: IO ()
 main = do 
@@ -22,10 +27,10 @@ main = do
   let fileName = srcFiles opts !! 0
   result <- try (readFile fileName) :: IO (Either IOException String)
   case result of
-    Left ex -> putStrLn $ genErrorString $ show ex 
+    Left ex -> printErr $ show ex 
     Right contents -> do 
-      putStrLn $ compile contents
       when (lexing opts) $ putStrLn $ printLexer contents
+      putStrLn $ compile contents
 
 optsInfo :: ParserInfo Options
 

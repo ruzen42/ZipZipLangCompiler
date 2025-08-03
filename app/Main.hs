@@ -17,6 +17,7 @@ data Options = Options
 
 main :: IO ()
 main = do 
+  printWarn "This program in development, bugs everywhere"
   opts <- execParser optsInfo 
   let fileName = srcFiles opts !! 0
   result <- try (readFile fileName) :: IO (Either IOException String)

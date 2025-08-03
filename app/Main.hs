@@ -1,10 +1,9 @@
 module Main (main) where
 
 import Options.Applicative
-import Control.Monad (when)
+import Control.Monad (when, forM_)
 import Compiler 
 import Control.Exception
-import System.Console.ANSI
 import OutputBindings
 
 data Options = Options 
@@ -19,13 +18,13 @@ main :: IO ()
 main = do 
   printWarn "This program in development, bugs everywhere"
   opts <- execParser optsInfo 
-  let fileName = srcFiles opts !! 0
-  result <- try (readFile fileName) :: IO (Either IOException String)
-  case result of
-    Left ex -> printErr $ show ex 
-    Right contents -> do 
-      when (lexing opts) $ putStrLn $ printLexer contents
-      putStrLn $ compile contents
+  forM_ (srcFiles opts) $ \fileName -> do
+    result <- try (readFile fileName) :: IO (Either IOException String)
+    case result of
+      Left ex -> printErr $ show ex 
+      Right contents -> do 
+        when (lexing opts) $ putStrLn $ printLexer contents
+        putStrLn $ compile contents
 
 optsInfo :: ParserInfo Options
 

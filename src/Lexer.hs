@@ -1,4 +1,4 @@
-module Lexer (Token(..), lexingString) where
+module Lexer (Token(..), lexingString, lexer) where
 
 import Text.Parsec
 import Text.Parsec.String 

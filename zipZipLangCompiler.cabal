@@ -30,6 +30,7 @@ library
       Compiler
       Lexer
       OutputBindings
+      Parser
       Preprocessor
   other-modules:
       Paths_zipZipLangCompiler

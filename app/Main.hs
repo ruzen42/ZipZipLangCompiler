@@ -14,7 +14,7 @@ data Options = Options
   } deriving (Show)
 
 genErrorString :: String -> String
-genErrorString error = "\033[0;31mError: " ++ error
+genErrorString s = "\033[0;31mError: " ++ s
 
 main :: IO ()
 main = do 

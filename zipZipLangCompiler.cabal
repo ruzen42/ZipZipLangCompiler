@@ -29,6 +29,7 @@ library
       AST
       Compiler
       Lexer
+      OutputBindings
       Preprocessor
   other-modules:
       Paths_zipZipLangCompiler

@@ -5,6 +5,7 @@ import Control.Monad (when)
 import Compiler 
 import Control.Exception
 import System.Console.ANSI
+import OutputBindings
 
 data Options = Options 
   { srcFiles    :: [String]
@@ -13,13 +14,6 @@ data Options = Options
   , onlyParse   :: Bool 
   , outputName  :: String 
   } deriving (Show)
-
-printErr :: String -> IO ()
-printErr s = do 
-  setSGR [SetColor Foreground Vivid Red] 
-  putStr "Error: "
-  setSGR [Reset] 
-  putStrLn s
 
 main :: IO ()
 main = do 

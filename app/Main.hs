@@ -3,6 +3,7 @@ module Main (main) where
 import Options.Applicative
 import Control.Monad (when)
 import Compiler 
+import Control.Exception
 
 data Options = Options 
   { srcFiles    :: [String]
@@ -12,13 +13,19 @@ data Options = Options
   , outputName  :: String 
   } deriving (Show)
 
+genErrorString :: String -> String
+genErrorString error = "\033[0;31mError: " ++ error
+
 main :: IO ()
 main = do 
   opts <- execParser optsInfo 
-  contents <- readFile (srcFiles opts !! 0)
-  putStrLn $ compile contents
-  when (lexing opts) $ putStrLn $ printLexer contents
-
+  let fileName = srcFiles opts !! 0
+  result <- try (readFile fileName) :: IO (Either IOException String)
+  case result of
+    Left ex -> putStrLn $ genErrorString $ show ex 
+    Right contents -> do 
+      putStrLn $ compile contents
+      when (lexing opts) $ putStrLn $ printLexer contents
 
 optsInfo :: ParserInfo Options
 

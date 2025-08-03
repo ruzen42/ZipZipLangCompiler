@@ -5,10 +5,12 @@ import Lexer
 
 compile, printLexer :: String -> String 
 
-compile input = 
+compile code = 
   either (("Error: " ++) . show) show $
-    preprocess input >>= lexingString 
+    preprocess code >>= lexingString 
 
-printLexer input = 
+printLexer code = 
   either (("Lexer error: " ++) . show) show $
-    lexingString input
+    lexingString code
+
+--printAST code = 

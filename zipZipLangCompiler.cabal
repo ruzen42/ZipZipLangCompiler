@@ -46,7 +46,7 @@ library
     , base >=4.7 && <5
     , bytestring >=0.12.2.0
     , containers >=0.7
-    , llvm-hs >=9.0.1
+    , llvm-hs
     , mtl >=2.3.1
     , optparse-applicative >=0.18.0.0
     , parsec >=3.1.16.0
@@ -66,7 +66,7 @@ executable zzc
     , base >=4.7 && <5
     , bytestring >=0.12.2.0
     , containers >=0.7
-    , llvm-hs >=9.0.1
+    , llvm-hs
     , mtl >=2.3.1
     , optparse-applicative >=0.18.0.0
     , parsec >=3.1.16.0

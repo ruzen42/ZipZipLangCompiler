@@ -114,5 +114,5 @@ operatorParser = do
 punctuationParser :: Parser Token
 punctuationParser = do
   pos <- getPosition
-  c <- oneOf "(){},=:."
+  c <- oneOf "()}{][,=:."
   return $ TPunctuation c pos

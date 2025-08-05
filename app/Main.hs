@@ -12,7 +12,6 @@ data Options = Options
   , verboseMode      :: Bool 
   , lexing           :: Bool 
   , onlyParse        :: Bool 
-  , stepByStep       :: Bool 
   , semanticAnalysis :: Bool 
   , outputName       :: String 
   } deriving (Show)
@@ -29,7 +28,7 @@ main = do
         when (lexing opts) $ putStrLn $ printLexer contents 
         when (onlyParse opts) $ putStrLn $ printAST contents 
         when (semanticAnalysis opts) $ putStrLn $ printAST contents
-        when (stepByStep opts) $ compileSteps contents 
+        when (verboseMode opts) $ compileSteps contents 
 
 optsInfo :: ParserInfo Options
 
@@ -39,7 +38,6 @@ optionsParser = Options
   <*> switch (long "verbose" <> short 'v' <> help "Enable verbose mode")
   <*> switch (long "lexer" <> short 'l' <> help "Print lexing files")
   <*> switch (long "parse" <> short 'p' <> help "Parsing files")
-  <*> switch (long "steps" <> short 's' <> help "Step by step")
   <*> switch (long "semantic-analys" <> help "Step by step")
   <*> strOption
         ( long "output"

@@ -1,11 +1,11 @@
 cabal-version: 2.2
 
--- This file has been generated from package.yaml by hpack version 0.38.1.
+-- This file has been generated from package.yaml by hpack version 0.36.1.
 --
 -- see: https://github.com/sol/hpack
 
 name:           zipZipLangCompiler
-version:        0.1.2.0
+version:        0.2.0.0
 description:    Please see the README on GitHub at <https://github.com/ruzen42/zipZipLangCompiler#readme>
 category:       System
 homepage:       https://github.com/ruzen42/zipZipLangCompiler#readme
@@ -27,6 +27,7 @@ source-repository head
 library
   exposed-modules:
       AST
+      CodeGen
       Compiler
       Lexer
       OutputBindings
@@ -43,7 +44,9 @@ library
   build-depends:
       ansi-terminal >=1.1.3
     , base >=4.7 && <5
+    , bytestring >=0.12.2.0
     , containers >=0.7
+    , llvm-hs >=9.0.1
     , mtl >=2.3.1
     , optparse-applicative >=0.18.0.0
     , parsec >=3.1.16.0
@@ -61,7 +64,9 @@ executable zzc
   build-depends:
       ansi-terminal >=1.1.3
     , base >=4.7 && <5
+    , bytestring >=0.12.2.0
     , containers >=0.7
+    , llvm-hs >=9.0.1
     , mtl >=2.3.1
     , optparse-applicative >=0.18.0.0
     , parsec >=3.1.16.0

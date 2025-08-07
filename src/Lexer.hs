@@ -26,7 +26,7 @@ instance Show Token where
   show (TType s _) = "Type: " ++ s
 
 keywords :: [String]
-keywords = ["module", "main", "if", "then", "else", "use", "case", "zip"] 
+keywords = ["name", "start", "when", "then", "other", "add", "case", "zip"] 
 
 typeNames :: [String]
 typeNames = ["Num", "Logic", "Text", "ZippedText"]

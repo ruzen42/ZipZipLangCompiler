@@ -4,7 +4,6 @@ import Preprocessor
 import Lexer 
 import Parser
 import SemanticAnalyzer
-import CodeGen
 
 printLexer :: String -> String 
 printLexer code = 
@@ -67,8 +66,3 @@ compileSteps code = do
                 Right symTable -> do
                   putStrLn "✓ Semantic analysis successful"
                   putStrLn $ "Symbol table: " ++ show symTable
-		  
-		  putStrLn "\n=== LLVM CODE GENERATION ==="
-		  putStrLn "✓ LLVM IR generation successful"
-                  putStrLn "Generated LLVM IR:"
-                  putStrLn llvmCode

@@ -1,6 +1,6 @@
 cabal-version: 2.2
 
--- This file has been generated from package.yaml by hpack version 0.36.1.
+-- This file has been generated from package.yaml by hpack version 0.38.1.
 --
 -- see: https://github.com/sol/hpack
 
@@ -27,7 +27,6 @@ source-repository head
 library
   exposed-modules:
       AST
-      CodeGen
       Compiler
       Lexer
       OutputBindings
@@ -46,7 +45,6 @@ library
     , base >=4.7 && <5
     , bytestring >=0.12.2.0
     , containers >=0.7
-    , llvm-hs
     , mtl >=2.3.1
     , optparse-applicative >=0.18.0.0
     , parsec >=3.1.16.0
@@ -66,7 +64,6 @@ executable zzc
     , base >=4.7 && <5
     , bytestring >=0.12.2.0
     , containers >=0.7
-    , llvm-hs
     , mtl >=2.3.1
     , optparse-applicative >=0.18.0.0
     , parsec >=3.1.16.0

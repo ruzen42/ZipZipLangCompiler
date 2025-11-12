@@ -1,33 +1,32 @@
 {
-  description = "zzcompiler flake";
+  description = "Offline Nix flake for Haskell shell-runner (GHC 9.10.2)";
 
   inputs = {
-    haskellNix.url = "github:input-output-hk/haskell.nix";
-    nixpkgs.follows = "haskellNix/nixpkgs-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils, haskellNix }:
-    flake-utils.lib.eachSystem [ "x86_64-linux" "x86_64-darwin" ] (system:
+  outputs = { self, nixpkgs, flake-utils }:
+    flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = import nixpkgs {
-          inherit system;
-          inherit (haskellNix) config;
-          overlays = [ haskellNix.overlay ];
-        };
-        project = pkgs.haskell-nix.project' {
-          src = ./.;
-          compiler-nix-name = "ghc96";
-          shell.tools = {
-            cabal = {};
-            stack = {};
-          };
-          shell.buildInputs = with pkgs; [
-            nixpkgs-fmt
+        pkgs = import nixpkgs { inherit system; };
+        haskell = pkgs.haskellPackages;
+        ghc = haskell.ghc;  # GHC 9.10.2
+        hsDeps = haskell.ghcWithPackages (p: with p; [ servant servant-server warp aeson text bytestring process ]);
+      in
+      {
+        devShell = pkgs.mkShell {
+          buildInputs = [
+            ghc
+            pkgs.cabal-install
+            haskell.stack
+            pkgs.git
+            pkgs.zlib
+            pkgs.pkg-config
           ];
         };
-      in {
-        packages.default = project.shell;
-        devShells.default = project.shell;
+
+        packages.shell-runner = pkgs.haskellPackages.callCabal2nix "shell-runner" ./. {};
       });
 }
+

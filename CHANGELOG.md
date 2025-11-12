@@ -1,4 +1,4 @@
-# Changelog for `zipZipLangCompiler`
+# Changelog for `zzlang-compiler`
 
 All notable changes to this project will be documented in this file.
 

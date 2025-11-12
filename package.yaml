@@ -1,27 +1,27 @@
-name:                zipZipLangCompiler
-version:             0.2.0.0
-github:              "ruzen42/zipZipLangCompiler"
+name:                zzlang-compiler
+version:             0.1.0.0
+github:              "ruzen42/zzlang-compiler"
 license:             BSD-3-Clause
 author:              "Jaroslav Mihajlenko"
 maintainer:          "malledeferlive@gmail.com"
-copyright:           "2025 Jaroslav Mihajlenko"
+copyright:           "GPLv3"
 
 extra-source-files:
 - README.md
 - CHANGELOG.md
 
+synopsis:            Compiler for ZZlang
 category:            System
 
-description:         Please see the README on GitHub at <https://github.com/ruzen42/zipZipLangCompiler#readme>
+description:         Please see the README on GitHub at <https://github.com/ruzen42/zzlang-compiler#readme>
+
+build-tools:
+  - alex
 
 dependencies:
 - base >= 4.7 && < 5
-- parsec >= 3.1.16.0
-- optparse-applicative >= 0.18.0.0
-- ansi-terminal >= 1.1.3
-- containers >= 0.7
-- mtl >= 2.3.1
-- bytestring >= 0.12.2.0
+- parsec
+- array
 
 ghc-options:
 - -Wall
@@ -46,4 +46,15 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - zipZipLangCompiler
+    - zzlang-compiler
+
+tests:
+  zzlang-compiler-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - zzlang-compiler

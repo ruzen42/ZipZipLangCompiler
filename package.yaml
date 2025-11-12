@@ -1,5 +1,5 @@
 name:                zzlang-compiler
-version:             0.1.0.0
+version:             0.1.1.0
 github:              "ruzen42/zzlang-compiler"
 license:             BSD-3-Clause
 author:              "Jaroslav Mihajlenko"
@@ -16,7 +16,9 @@ category:            System
 description:         Please see the README on GitHub at <https://github.com/ruzen42/zzlang-compiler#readme>
 
 build-tools:
-  - alex
+- alex
+- happy
+- optparse-applicative
 
 dependencies:
 - base >= 4.7 && < 5

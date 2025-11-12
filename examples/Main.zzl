@@ -1,0 +1,21 @@
+in Main
+
+hello Text: "hello"
+
+Num add Num a, Num b: a + b
+Num rem Num a, Num b: a - b
+Num mulp Num a, Num b: a * b
+
+
+Action main:
+    print(hello);
+    User user = create User("Name", 33, Admin);
+
+record User:
+    name Text,
+    age  Num,
+    type UserType,
+
+enum UserType: Admin | Regular
+
+

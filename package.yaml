@@ -18,12 +18,13 @@ description:         Please see the README on GitHub at <https://github.com/ruze
 build-tools:
 - alex
 - happy
-- optparse-applicative
 
 dependencies:
 - base >= 4.7 && < 5
 - parsec
 - array
+- optparse-applicative
+- containers
 
 ghc-options:
 - -Wall

@@ -1,88 +1,107 @@
 {
 module Parser where
+
 import AST
 import Lexer
 }
 
-%name parser
+%name parse
 %tokentype { Token }
 %error { parseError }
 
 %token
-  tokIn       { TokIn }
-  tokRecord   { TokRecord }
-  tokEnum     { TokEnum }
-  tokAction   { TokAction }
-  tokNum      { TokNum }
-  tokText     { TokText }
-  tokArrow    { TokArrow }
-  tokColon    { TokColon }
-  tokComma    { TokComma }
-  tokSemicolon { TokSemicolon }
-  tokEq       { TokEq }
-  tokPlus     { TokPlus }
-  tokMinus    { TokMinus }
-  tokStar     { TokStar }
-  tokPipe     { TokPipe }
-  tokLParen   { TokLParen }
-  tokRParen   { TokRParen }
-  tokIdent    { String } { TokIdent $$ }
-  tokNumber   { Int }    { TokNumber $$ }
-  tokString   { String } { TokString $$ }
+  in        { TokIn }
+  record    { TokRecord }
+  enum      { TokEnum }
+  Action    { TokAction }
+  Num       { TokNum }
+  Text      { TokText }
+  ':'       { TokColon }
+  ','       { TokComma }
+  ';'       { TokSemicolon }
+  '='       { TokEq }
+  '->'      { TokArrow }
+  '+'       { TokPlus }
+  '-'       { TokMinus }
+  '*'       { TokStar }
+  '|'       { TokPipe }
+  '('       { TokLParen }
+  ')'       { TokRParen }
+  ident     { TokIdent $$ }
+  number    { TokNumber $$ }
+  string    { TokString $$ }
+
+%left '+' '-'
+%left '*'
 
 %%
 
-Program :: { Program }
-  : tokIn tokIdent Stmts { Program $2 $3 }
+Program : in ident Stmts                { Program $2 $3 }
 
-Stmts :: { [Stmt] }
-  : Stmt Stmts { $1 : $2 }
-  |            { [] }
+Stmts : {- empty -}                     { [] }
+      | Stmt Stmts                      { $1 : $2 }
 
-Stmt :: { Stmt }
-  : tokNum tokIdent Params tokColon Expr { FunDecl $2 $3 TyNum $5 }
-  | tokText tokIdent tokColon Expr        { VarDecl $2 TyText $4 }
-  | tokAction tokIdent tokColon Stmts     { ActionDecl $2 $4 }
-  | tokRecord tokIdent tokColon Fields    { RecordDecl $2 $4 }
-  | tokEnum tokIdent tokColon EnumList    { EnumDecl $2 $4 }
+Stmt : ident Type ':' Expr              { VarDecl $1 $2 $4 }
+     | Type ident Params ':' Expr       { FunDecl $2 $3 $1 $5 }
+     | Action ident ':' ActionBody      { ActionDecl $2 $4 }
+     | record ident ':' Fields          { RecordDecl $2 $4 }
+     | enum ident ':' EnumVariants      { EnumDecl $2 $4 }
 
-Params :: { [(String, Type)] }
-  : ParamList { $1 }
-  |            { [] }
+Params : {- empty -}                    { [] }
+       | ParamList                      { $1 }
 
-ParamList :: { [(String, Type)] }
-  : Param { [$1] }
-  | Param tokComma ParamList { $1 : $3 }
+ParamList : Type ident                  { [($2, $1)] }
+          | Type ident ',' ParamList    { ($2, $1) : $4 }
 
-Param :: { (String, Type) }
-  : tokNum tokIdent { ($2, TyNum) }
-  | tokText tokIdent { ($2, TyText) }
+ActionBody : {- empty -}                { [] }
+           | ActionStmt ActionBody      { $1 : $2 }
 
-Fields :: { [Field] }
-  : Field { [$1] }
-  | Field tokComma Fields { $1 : $3 }
+ActionStmt : Type ident '=' Expr ';'    { VarDecl $2 $1 $4 }
+           | Expr ';'                   { ExprStmt $1 }
 
-Field :: { Field }
-  : tokIdent tokType { Field $1 $2 }
+Fields : Field                          { [$1] }
+       | Field ',' Fields               { $1 : $3 }
 
-EnumList :: { [String] }
-  : tokIdent { [$1] }
-  | tokIdent tokPipe EnumList { $1 : $3 }
+Field : ident Type                      { Field $1 $2 }
 
-Expr :: { Expr }
-  : tokIdent           { EVar $1 }
-  | tokNumber           { ENum $1 }
-  | tokString           { EStr $1 }
-  | Expr tokPlus Expr   { EBinOp "+" $1 $3 }
-  | Expr tokMinus Expr  { EBinOp "-" $1 $3 }
-  | Expr tokStar Expr   { EBinOp "*" $1 $3 }
-  | tokIdent tokLParen Args tokRParen { ECall $1 $3 }
+EnumVariants : ident                    { [$1] }
+             | ident '|' EnumVariants   { $1 : $3 }
 
-Args :: { [Expr] }
-  : Expr { [$1] }
-  | Expr tokComma Args { $1 : $3 }
+Type : Num                              { TyNum }
+     | Text                             { TyText }
+     | ident                            { TyCustom $1 }
 
-%%
+Expr : Term                             { $1 }
+     | Expr '+' Expr                    { EBinOp "+" $1 $3 }
+     | Expr '-' Expr                    { EBinOp "-" $1 $3 }
+     | Expr '*' Expr                    { EBinOp "*" $1 $3 }
+
+Term : ident                            { EVar $1 }
+     | number                           { ENum $1 }
+     | string                           { EStr $1 }
+     | ident '(' Args ')'               { ECall $1 $3 }
+     | '(' Expr ')'                     { $2 }
+
+Args : {- empty -}                      { [] }
+     | ArgList                          { $1 }
+
+ArgList : Expr                          { [$1] }
+        | Expr ',' ArgList              { $1 : $3 }
+
+{
 
 parseError :: [Token] -> a
-parseError _ = error "Parse error"
+parseError [] = error "Parse error: unexpected end of input"
+parseError tokens = error $ unlines
+  [ "Parse error!"
+  , "Expected valid statement or expression"
+  , "Got: " ++ show (head tokens)
+  , "Context: " ++ show (take 5 tokens)
+  , ""
+  , "Hint: Check for:"
+  , "  - Missing semicolons"
+  , "  - Incorrect type declarations"
+  , "  - Malformed expressions"
+  ]
+
+}

@@ -9,12 +9,14 @@ Num mulp Num a, Num b: a * b
 
 Action main:
     print(hello);
-    User user = create User("Name", 33, Admin);
+    print(hello);
+    print(hello);
+    print(hello);
 
 record User:
     name Text,
     age  Num,
-    type UserType,
+    type UserType
 
 enum UserType: Admin | Regular
 

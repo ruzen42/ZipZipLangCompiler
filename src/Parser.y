@@ -13,37 +13,61 @@ import Lexer
   in        { TokIn }
   record    { TokRecord }
   enum      { TokEnum }
+  if        { TokIf }
+  then      { TokThen }
+  else      { TokElse }
+  let       { TokLet }
+  true      { TokTrue }
+  false     { TokFalse }
   Action    { TokAction }
   Num       { TokNum }
   Text      { TokText }
+  Logic     { TokLogic }
   ':'       { TokColon }
   ','       { TokComma }
   ';'       { TokSemicolon }
   '='       { TokEq }
+  '=='      { TokEqEq }
+  '!='      { TokNeq }
+  '<'       { TokLt }
+  '>'       { TokGt }
+  '<='      { TokLe }
+  '>='      { TokGe }
   '->'      { TokArrow }
   '+'       { TokPlus }
   '-'       { TokMinus }
   '*'       { TokStar }
+  '/'       { TokSlash }
+  '%'       { TokPercent }
+  '&&'      { TokAnd }
+  '||'      { TokOr }
+  '!'       { TokNot }
   '|'       { TokPipe }
   '('       { TokLParen }
   ')'       { TokRParen }
+  '{'       { TokLBrace }
+  '}'       { TokRBrace }
   ident     { TokIdent $$ }
   number    { TokNumber $$ }
   string    { TokString $$ }
 
+%right '->'
+%left '||'
+%left '&&'
+%nonassoc '==' '!=' '<' '>' '<=' '>='
 %left '+' '-'
-%left '*'
+%left '*' '/' '%'
+%right '!'
+%right NEG
 
 %%
 
-Program : in ident Stmts                { Program $2 $3 }
+Program : in ident Decls                { Program $2 $3 }
 
-Stmts : {- empty -}                     { [] }
-      | Stmt Stmts                      { $1 : $2 }
+Decls : {- empty -}                     { [] }
+      | Decl Decls                      { $1 : $2 }
 
-Stmt : ident Type ':' Expr              { VarDecl $1 $2 $4 }
-     | Type ident Params ':' Expr       { FunDecl $2 $3 $1 $5 }
-     | Action ident ':' ActionBody      { ActionDecl $2 $4 }
+Decl : Type ident Params ':' Expr       { FunDecl $2 $3 $1 $5 }
      | record ident ':' Fields          { RecordDecl $2 $4 }
      | enum ident ':' EnumVariants      { EnumDecl $2 $4 }
 
@@ -52,12 +76,6 @@ Params : {- empty -}                    { [] }
 
 ParamList : Type ident                  { [($2, $1)] }
           | Type ident ',' ParamList    { ($2, $1) : $4 }
-
-ActionBody : {- empty -}                { [] }
-           | ActionStmt ActionBody      { $1 : $2 }
-
-ActionStmt : Type ident '=' Expr ';'    { VarDecl $2 $1 $4 }
-           | Expr ';'                   { ExprStmt $1 }
 
 Fields : Field                          { [$1] }
        | Field ',' Fields               { $1 : $3 }
@@ -69,16 +87,33 @@ EnumVariants : ident                    { [$1] }
 
 Type : Num                              { TyNum }
      | Text                             { TyText }
+     | Logic                            { TyLogic }
+     | Action                           { TyAction Nothing }
      | ident                            { TyCustom $1 }
 
 Expr : Term                             { $1 }
-     | Expr '+' Expr                    { EBinOp "+" $1 $3 }
-     | Expr '-' Expr                    { EBinOp "-" $1 $3 }
-     | Expr '*' Expr                    { EBinOp "*" $1 $3 }
+     | Expr '+' Expr                    { EBinOp Add $1 $3 }
+     | Expr '-' Expr                    { EBinOp Sub $1 $3 }
+     | Expr '*' Expr                    { EBinOp Mul $1 $3 }
+     | Expr '/' Expr                    { EBinOp Div $1 $3 }
+     | Expr '%' Expr                    { EBinOp Mod $1 $3 }
+     | Expr '==' Expr                   { EBinOp Eq $1 $3 }
+     | Expr '!=' Expr                   { EBinOp Neq $1 $3 }
+     | Expr '<' Expr                    { EBinOp Lt $1 $3 }
+     | Expr '>' Expr                    { EBinOp Gt $1 $3 }
+     | Expr '<=' Expr                   { EBinOp Le $1 $3 }
+     | Expr '>=' Expr                   { EBinOp Ge $1 $3 }
+     | Expr '&&' Expr                   { EBinOp And $1 $3 }
+     | Expr '||' Expr                   { EBinOp Or $1 $3 }
+     | '!' Expr                         { EUnOp Not $2 }
+     | '-' Expr %prec NEG               { EUnOp Neg $2 }
+     | if Expr then Expr else Expr      { EIf $2 $4 $6 }
 
 Term : ident                            { EVar $1 }
      | number                           { ENum $1 }
      | string                           { EStr $1 }
+     | true                             { EBool True }
+     | false                            { EBool False }
      | ident '(' Args ')'               { ECall $1 $3 }
      | '(' Expr ')'                     { $2 }
 
@@ -103,5 +138,4 @@ parseError tokens = error $ unlines
   , "  - Incorrect type declarations"
   , "  - Malformed expressions"
   ]
-
 }

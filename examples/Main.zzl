@@ -1,17 +1,19 @@
 in Main
 
-hello Text: "hello"
 
 Num add Num a, Num b: a + b
+
 Num rem Num a, Num b: a - b
+
 Num mulp Num a, Num b: a * b
+
+Text hello: "hello"
 
 
 Action main:
     print(hello);
-    print(hello);
-    print(hello);
-    print(hello);
+
+
 
 record User:
     name Text,

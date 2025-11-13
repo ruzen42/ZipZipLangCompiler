@@ -23,7 +23,6 @@ dependencies:
 - base >= 4.7 && < 5
 - parsec
 - array
-- optparse-applicative
 - containers
 
 ghc-options:
@@ -39,6 +38,10 @@ ghc-options:
 
 library:
   source-dirs: src
+  dependencies:
+  - llvm-hs
+  - llvm-hs-pure
+  - mtl
 
 executables:
   zzc:
@@ -50,6 +53,7 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - zzlang-compiler
+    - optparse-applicative
 
 tests:
   zzlang-compiler-test:

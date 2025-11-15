@@ -13,14 +13,12 @@ data AnalysisResult = AnalysisResult
     , warnings :: ErrorList
     } deriving (Show)
 
--- Анализ всей программы
 analyzeProgram :: Program -> AnalysisResult
 analyzeProgram (Program moduleName decls) =
     let symTable = buildSymbolTable decls
         (errs, warns) = analyzeDecls symTable decls
     in AnalysisResult errs warns
 
--- Построение таблицы символов (первый проход)
 buildSymbolTable :: [Decl] -> SymbolTable
 buildSymbolTable = foldl addDecl Map.empty
   where
@@ -28,7 +26,6 @@ buildSymbolTable = foldl addDecl Map.empty
     addDecl table (RecordDecl name _) = Map.insert name (TyCustom name) table
     addDecl table (EnumDecl name _) = Map.insert name (TyCustom name) table
 
--- Анализ списка деклараций (второй проход)
 analyzeDecls :: SymbolTable -> [Decl] -> (ErrorList, ErrorList)
 analyzeDecls symTable decls =
     foldl processDecl ([], []) decls
@@ -37,7 +34,6 @@ analyzeDecls symTable decls =
         let (newErrs, newWarns) = analyzeDecl symTable decl
         in (errs ++ newErrs, warns ++ newWarns)
 
--- Анализ одной декларации
 analyzeDecl :: SymbolTable -> Decl -> (ErrorList, ErrorList)
 analyzeDecl symTable (FunDecl name params retTy body) =
     let paramSymTable = foldl (\st (pName, pTy) -> Map.insert pName pTy st) symTable params
@@ -46,7 +42,7 @@ analyzeDecl symTable (FunDecl name params retTy body) =
             (Just bt, rt) | not (typesCompatible bt rt) ->
                 ["Function '" ++ name ++ "' return type mismatch: expected " ++
                  show rt ++ ", got " ++ show bt]
-            (Nothing, _) -> []  -- Ошибки типов уже в errs
+            (Nothing, _) -> []
             _ -> []
     in (errs ++ typeErrs, warns)
 
@@ -65,7 +61,6 @@ analyzeDecl symTable (EnumDecl name variants) =
                else ["Duplicate variants in enum '" ++ name ++ "': " ++ show duplicates]
     in (errs, [])
 
--- Вывод типов с проверкой
 inferType :: SymbolTable -> Expr -> (Maybe Type, ErrorList, ErrorList)
 inferType symTable (EVar name) =
     case Map.lookup name symTable of
@@ -111,7 +106,7 @@ inferType symTable (ECall func args) =
             in (tys ++ [ty], errs ++ e, warns ++ w)
         funcErrs = case funcTy of
             Nothing -> ["Undefined function: " ++ func]
-            Just _ -> []  -- TODO: проверка типов параметров
+            Just _ -> []  -- TODO: check types of args
     in (funcTy, argErrs ++ funcErrs, argWarns)
 
 inferType symTable (EIf cond thenE elseE) =
@@ -126,7 +121,7 @@ inferType symTable (EIf cond thenE elseE) =
             (Just tt, Just et) | not (typesCompatible tt et) ->
                 ["If branches type mismatch: then is " ++ show tt ++ ", else is " ++ show et]
             _ -> []
-        resultTy = thenTy  -- Берем тип then ветки
+        resultTy = thenTy
     in (resultTy, condErrs ++ thenErrs ++ elseErrs ++ condTypeErrs ++ branchTypeErrs,
         condWarns ++ thenWarns ++ elseWarns)
 
@@ -146,14 +141,13 @@ inferType symTable (ELambda params body) =
             Nothing -> Nothing
     in (lambdaTy, errs, warns)
 
--- Типы операторов
 opTypes :: BinOp -> (Type, Type)
 opTypes Add = (TyNum, TyNum)
 opTypes Sub = (TyNum, TyNum)
 opTypes Mul = (TyNum, TyNum)
 opTypes Div = (TyNum, TyNum)
 opTypes Mod = (TyNum, TyNum)
-opTypes Eq = (TyNum, TyLogic)  -- Упрощение: только для чисел
+opTypes Eq = (TyNum, TyLogic)
 opTypes Neq = (TyNum, TyLogic)
 opTypes Lt = (TyNum, TyLogic)
 opTypes Gt = (TyNum, TyLogic)
@@ -166,7 +160,6 @@ unOpTypes :: UnOp -> (Type, Type)
 unOpTypes Neg = (TyNum, TyNum)
 unOpTypes Not = (TyLogic, TyLogic)
 
--- Проверка совместимости типов
 typesCompatible :: Type -> Type -> Bool
 typesCompatible TyNum TyNum = True
 typesCompatible TyText TyText = True
@@ -175,14 +168,12 @@ typesCompatible (TyCustom a) (TyCustom b) = a == b
 typesCompatible (TyAction a) (TyAction b) = a == b
 typesCompatible _ _ = False
 
--- Вспомогательные функции
 findDuplicates :: Eq a => [a] -> [a]
 findDuplicates [] = []
 findDuplicates (x:xs)
     | x `elem` xs = x : findDuplicates (filter (/= x) xs) ++ [x]
     | otherwise = findDuplicates xs
 
--- Проверка результата анализа
 hasErrors :: AnalysisResult -> Bool
 hasErrors = not . null . errors
 

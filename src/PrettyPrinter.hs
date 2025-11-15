@@ -3,13 +3,11 @@ module PrettyPrinter where
 import AST
 import Data.List (intercalate)
 
--- Pretty print всей программы
 prettyProgram :: Program -> String
 prettyProgram (Program name decls) =
     "Module: " ++ name ++ "\n\n" ++
     intercalate "\n\n" (map prettyDecl decls)
 
--- Pretty print декларации
 prettyDecl :: Decl -> String
 prettyDecl (FunDecl name params retTy body) =
     "Function Declaration:\n" ++
@@ -29,7 +27,6 @@ prettyDecl (EnumDecl name variants) =
     "  Name: " ++ name ++ "\n" ++
     "  Variants: " ++ intercalate ", " variants
 
--- Pretty print типов
 prettyType :: Type -> String
 prettyType TyNum = "Num"
 prettyType TyLogic = "Logic"
@@ -40,7 +37,6 @@ prettyType (TyCustom name) = name
 prettyType (TyFun params ret) =
     "(" ++ intercalate ", " (map prettyType params) ++ ") -> " ++ prettyType ret
 
--- Pretty print параметров
 prettyParams :: [(String, Type)] -> String
 prettyParams [] = "(none)"
 prettyParams params = intercalate ", " (map prettyParam params)
@@ -48,11 +44,9 @@ prettyParams params = intercalate ", " (map prettyParam params)
 prettyParam :: (String, Type) -> String
 prettyParam (name, ty) = name ++ ": " ++ prettyType ty
 
--- Pretty print полей
 prettyField :: Field -> String
 prettyField (Field name ty) = name ++ ": " ++ prettyType ty
 
--- Pretty print выражений
 prettyExpr :: Expr -> String
 prettyExpr (EVar name) = name
 prettyExpr (ENum n) = show n
@@ -73,7 +67,6 @@ prettyExpr (ELet name val body) =
 prettyExpr (ELambda params body) =
     "λ(" ++ intercalate ", " (map prettyParam params) ++ ") -> " ++ prettyExpr body
 
--- Pretty print операторов
 prettyBinOp :: BinOp -> String
 prettyBinOp Add = "+"
 prettyBinOp Sub = "-"
@@ -93,6 +86,5 @@ prettyUnOp :: UnOp -> String
 prettyUnOp Neg = "-"
 prettyUnOp Not = "!"
 
--- Вспомогательная функция для отступов
 indent :: Int -> String -> String
 indent n str = unlines $ map (replicate n ' ' ++) (lines str)

@@ -39,9 +39,11 @@ ghc-options:
 library:
   source-dirs: src
   dependencies:
-  - llvm-hs
-  - llvm-hs-pure
   - mtl
+  - aeson
+  - bytestring
+  - text
+  - base
 
 executables:
   zzc:

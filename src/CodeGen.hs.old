@@ -18,25 +18,23 @@ import Data.String (fromString)
 import Control.Monad.State
 import Data.Word
 
--- Состояние кодогенератора
 data CodegenState = CodegenState
-    { currentBlock :: L.Name                    -- Текущий блок
-    , blocks :: Map.Map L.Name BlockState       -- Все блоки
-    , symtab :: Map.Map String Operand          -- Таблица символов
-    , blockCount :: Int                         -- Счетчик блоков
-    , count :: Word                             -- Счетчик временных переменных
-    , names :: Map.Map String Int               -- Счетчик имен
+    { currentBlock :: L.Name
+    , blocks :: Map.Map L.Name BlockState
+    , symtab :: Map.Map String Operand
+    , blockCount :: Int
+    , count :: Word
+    , names :: Map.Map String Int
     } deriving Show
 
 data BlockState = BlockState
-    { idx :: Int                                -- Индекс блока
-    , stack :: [Named Instruction]              -- Стек инструкций
-    , term :: Maybe (Named Terminator)          -- Терминатор блока
+    { idx :: Int
+    , stack :: [Named Instruction]
+    , term :: Maybe (Named Terminator)
     } deriving Show
 
 type Codegen = State CodegenState
 
--- Генерация LLVM модуля из Program
 codegenProgram :: Program -> L.Module
 codegenProgram (Program name decls) =
     L.defaultModule
@@ -44,7 +42,6 @@ codegenProgram (Program name decls) =
         , L.moduleDefinitions = map codegenDecl decls
         }
 
--- Генерация декларации
 codegenDecl :: Decl -> L.Definition
 codegenDecl (FunDecl name params retTy body) =
     let llvmRetTy = toLLVMType retTy
@@ -58,8 +55,6 @@ codegenDecl (FunDecl name params retTy body) =
         }
 
 codegenDecl (RecordDecl name fields) =
-    -- Для простоты, пока просто игнорируем record декларации
-    -- В будущем можно генерировать struct типы
     L.GlobalDefinition $ L.globalVariableDefaults
         { LG.name = L.Name (fromString $ "_record_" ++ name)
         , LG.type' = LT.i32
@@ -67,35 +62,28 @@ codegenDecl (RecordDecl name fields) =
         }
 
 codegenDecl (EnumDecl name variants) =
-    -- Для простоты, enum представляем как константы
     L.GlobalDefinition $ L.globalVariableDefaults
         { LG.name = L.Name (fromString $ "_enum_" ++ name)
         , LG.type' = LT.i32
         , LG.initializer = Just $ LC.Int 32 0
         }
 
--- Генерация функции
 codegenFunction :: [(String, Type)] -> Expr -> Codegen [L.BasicBlock]
 codegenFunction params body = do
     entry <- addBlock "entry"
     setBlock entry
 
-    -- Добавляем параметры в таблицу символов
     forM_ params $ \(n, ty) -> do
         let op = LocalReference (toLLVMType ty) (L.Name $ fromString n)
         assign n op
 
-    -- Генерируем тело функции
     result <- codegenExpr body
 
-    -- Добавляем return
     term <- ret result
 
-    -- Получаем все блоки
     allBlocks <- gets blocks
     return $ createBlocks allBlocks
 
--- Генерация выражения
 codegenExpr :: Expr -> Codegen Operand
 codegenExpr (EVar name) = do
     syms <- gets symtab
@@ -107,8 +95,6 @@ codegenExpr (ENum n) =
     return $ ConstantOperand $ LC.Int 64 (fromIntegral n)
 
 codegenExpr (EStr s) = do
-    -- Строки - это указатели на i8
-    -- Для простоты возвращаем null pointer
     return $ ConstantOperand $ LC.Null LT.i8
 
 codegenExpr (EBool b) =
@@ -159,22 +145,18 @@ codegenExpr (EIf cond thenE elseE) = do
     elseBlock <- addBlock "if.else"
     mergeBlock <- addBlock "if.merge"
 
-    -- Условный переход
     cbr condOp thenBlock elseBlock
 
-    -- Then блок
     setBlock thenBlock
     thenVal <- codegenExpr thenE
     br mergeBlock
     thenBlock' <- gets currentBlock
 
-    -- Else блок
     setBlock elseBlock
     elseVal <- codegenExpr elseE
     br mergeBlock
     elseBlock' <- gets currentBlock
 
-    -- Merge блок
     setBlock mergeBlock
     phi LT.i64 [(thenVal, thenBlock'), (elseVal, elseBlock')]
 
@@ -184,21 +166,17 @@ codegenExpr (ELet name val body) = do
     codegenExpr body
 
 codegenExpr (ELambda params body) = do
-    -- Lambda требует более сложной реализации
-    -- Для простоты возвращаем null
     return $ ConstantOperand $ LC.Null LT.i64
 
--- Конвертация типов AST в LLVM типы
 toLLVMType :: Type -> LT.Type
 toLLVMType TyNum = LT.i64
 toLLVMType TyLogic = LT.i1
 toLLVMType TyText = LT.ptr LT.i8
 toLLVMType (TyAction _) = LT.void
-toLLVMType (TyCustom _) = LT.i64  -- Упрощение
+toLLVMType (TyCustom _) = LT.i64
 toLLVMType (TyFun params ret) =
     LT.FunctionType (toLLVMType ret) (map toLLVMType params) False
 
--- Вспомогательные функции для генерации кода
 emptyCodegen :: CodegenState
 emptyCodegen = CodegenState
     { currentBlock = L.Name "entry"
@@ -290,7 +268,6 @@ createBlocks blks = map makeBlock $ Map.toList blks
     maketerm (Just x) = x
     maketerm Nothing = error "Block has no terminator"
 
--- Экспорт LLVM IR в файл
 generateLLVM :: Program -> IO String
 generateLLVM prog = do
     let llvmModule = codegenProgram prog
@@ -298,7 +275,6 @@ generateLLVM prog = do
         withModuleFromAST ctx llvmModule $ \m ->
             moduleLLVMAssembly m
 
--- Сохранение LLVM IR в файл
 saveLLVMToFile :: Program -> FilePath -> IO ()
 saveLLVMToFile prog filepath = do
     llvmIR <- generateLLVM prog

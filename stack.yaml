@@ -5,8 +5,8 @@ packages:
 - .
 
 extra-deps:
-- llvm-hs-9.0.1@sha256:ee6ec2eb8cba4daf2a43586388a87dbfd6a2ec6d81d1f9965896ac187acad286,8700
-- llvm-hs-pure-9.0.0@sha256:10f655a15791a28cc53412ff9c7ce8245903da065d1dd3b981b33cfebd277693,3077
+- foreign-0.2.1.0@sha256:3c4562ca607b8aa7962b00768a0dd0d5cf52fe0662b586bb44d300cfb3238634,2471
+
 
 allow-newer: true
 

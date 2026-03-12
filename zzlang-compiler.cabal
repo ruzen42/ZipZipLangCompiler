@@ -1,6 +1,6 @@
 cabal-version: 2.2
 
--- This file has been generated from package.yaml by hpack version 0.38.0.
+-- This file has been generated from package.yaml by hpack version 0.39.1.
 --
 -- see: https://github.com/sol/hpack
 
@@ -26,15 +26,6 @@ source-repository head
   location: https://github.com/ruzen42/zzlang-compiler
 
 library
-  exposed-modules:
-      AST
-      ASTJson
-      Lexer
-      Lib
-      Parser
-      Preprocessor
-      PrettyPrinter
-      SemanticAnalyzer
   other-modules:
       Paths_zzlang_compiler
   autogen-modules:

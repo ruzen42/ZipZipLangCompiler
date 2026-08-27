@@ -1,56 +1,56 @@
 module Main (main) where
 
-import Lib (compile)
-import Options.Applicative
-import Control.Monad (when)
-import System.Exit (exitSuccess)
+import System.Environment (getArgs)
+import System.Exit (exitFailure)
+import System.IO (hPutStrLn, stderr)
+import Control.Exception (SomeException, try)
+import Control.Monad.State (runStateT)
+import qualified Data.Text.IO as TIO
+import Data.Vector (Vector)
+import qualified Data.Vector as V
 
-data Options = Options
-    { files      :: [String]
-    , verbose    :: Bool
-    , version    :: Bool
-    , outputFile :: String
-    } deriving (Show)
-
-ver :: String
-ver = "0.1.0.0"
+import VM (Instruction, initVM, runVM)
+import Parse (parse)
+import Core (parseAndRun, dumpProgram, loadProgram)
 
 main :: IO ()
 main = do
-    options <- execParser opts
-    let fileList = files options
-        verboseMode = verbose options
-        showVersion = version options
+  rawArgs <- getArgs
+  let args = V.fromList rawArgs
+  if V.length args < 2
+    then usage
+    else do
+      let cmd  = args V.! 0
+          file = args V.! 1
+          rest = V.drop 2 args
+      case cmd of
+        "compile" -> compile file rest
+        "run"     -> run file
+        _         -> usage
 
-    when showVersion $ putStrLn ver >> exitSuccess
+usage :: IO ()
+usage = do
+  hPutStrLn stderr "usage: zzc <compile|run> [<file> ...]"
+  exitFailure
 
-    mapM_ (compile verboseMode) fileList
+compile :: FilePath -> Vector FilePath -> IO ()
+compile inFile rest = do
+  source <- TIO.readFile inFile
+  case parse source of
+    Left err -> do
+      hPutStrLn stderr ("parse error: " ++ err)
+      exitFailure
+    Right program -> do
+      let outFile = if V.null rest then inFile ++ ".zvm" else rest V.! 0
+      dumpProgram outFile program
 
-    when verboseMode $ print options
-
-
-opts :: ParserInfo Options
-opts = info (helper <*> optionsParser)
-    ( fullDesc
-    <> progDesc "Compiler for .zzl files"
-    <> header "zzc - crossplatform, high-performance zip zip lang compiler" )
-
-optionsParser :: Parser Options
-optionsParser = Options
-    <$> some (strArgument
-        ( metavar "FILES..."
-       <> help "Input files" ))
-    <*> switch
-        ( long "verbose"
-       <> short 'V'
-       <> help "Enable verbose mode" )
-    <*> switch
-        ( long "version"
-       <> short 'v'
-       <> help "Show program version" )
-    <*> strOption
-        ( long "output"
-       <> short 'o'
-       <> metavar "OUTPUT"
-       <> help "Output file"
-       <> value "Main" )
+run :: FilePath -> IO ()
+run file = do
+  loaded <- try (loadProgram file) :: IO (Either SomeException (Vector Instruction))
+  case loaded of
+    Right program -> do
+      _ <- runStateT (runVM program) initVM
+      pure ()
+    Left _ -> do
+      source <- TIO.readFile file
+      parseAndRun source

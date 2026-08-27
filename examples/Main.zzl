@@ -1,25 +1,2 @@
-in Main
-
-
-Num add Num a, Num b: a + b
-
-Num rem Num a, Num b: a - b
-
-Num mulp Num a, Num b: a * b
-
-Text hello: "hello"
-
-
-Action main:
-    print(hello);
-
-
-
-record User:
-    name Text,
-    age  Num,
-    type UserType
-
-enum UserType: Admin | Regular
-
-
+print ( "Hello World!\n" : Text ) 
+print ( 130 : Num ) 

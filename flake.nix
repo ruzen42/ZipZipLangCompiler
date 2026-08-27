@@ -1,6 +1,4 @@
 {
-  description = "Offline Nix flake for Haskell shell-runner (GHC 9.10.2)";
-
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
@@ -10,23 +8,26 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
-        haskell = pkgs.haskellPackages;
-        ghc = haskell.ghc;  # GHC 9.10.2
-        hsDeps = haskell.ghcWithPackages (p: with p; [ servant servant-server warp aeson text bytestring process ]);
+        hpkgs = pkgs.haskell.packages.native-bignum.ghc9103;
+
+        zzc = hpkgs.callCabal2nix "zzc" ./.;
       in
       {
-        devShell = pkgs.mkShell {
-          buildInputs = [
-            ghc
-            pkgs.cabal-install
-            haskell.stack
-            pkgs.git
-            pkgs.zlib
-            pkgs.pkg-config
+        devShells.default = pkgs.mkShell {
+          buildInputs = with pkgs; [
+            hpkgs.ghc
+            cabal-install
+            stack
+            git
+            zlib
+            pkg-config
           ];
+
+          shellHook = ''
+            export LD_LIBRARY_PATH="${pkgs.liboqs}/lib:$LD_LIBRARY_PATH"
+          '';
         };
 
-        packages.shell-runner = pkgs.haskellPackages.callCabal2nix "shell-runner" ./. {};
+        packages.default = zzc;
       });
 }
-

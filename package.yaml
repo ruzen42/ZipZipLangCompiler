@@ -1,10 +1,9 @@
-name:                zzlang-compiler
-version:             0.1.1.0
-github:              "ruzen42/zzlang-compiler"
+name:                zzc 
+version:             0.1.0
+github:              "ruzen42/zzc"
 license:             BSD-3-Clause
-author:              "Jaroslav Mihajlenko"
-maintainer:          "malledeferlive@gmail.com"
-copyright:           "GPLv3"
+author:              "Ruzen42"
+maintainer:          "ruzen@tuta.io"
 
 extra-source-files:
 - README.md
@@ -13,17 +12,10 @@ extra-source-files:
 synopsis:            Compiler for ZZlang
 category:            System
 
-description:         Please see the README on GitHub at <https://github.com/ruzen42/zzlang-compiler#readme>
-
-build-tools:
-- alex
-- happy
+description:         Please see the README on GitHub at <https://github.com/ruzen42/zzc#readme>
 
 dependencies:
 - base >= 4.7 && < 5
-- parsec
-- array
-- containers
 
 ghc-options:
 - -Wall
@@ -39,11 +31,14 @@ ghc-options:
 library:
   source-dirs: src
   dependencies:
-  - mtl
-  - aeson
   - bytestring
+  - mtl
   - text
+  - vector
   - base
+  - megaparsec
+  - unordered-containers
+  - binary
 
 executables:
   zzc:
@@ -54,8 +49,10 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - zzlang-compiler
-    - optparse-applicative
+    - zzc 
+    - text
+    - mtl
+    - vector
 
 tests:
   zzlang-compiler-test:
@@ -66,4 +63,4 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - zzlang-compiler
+    - zzc

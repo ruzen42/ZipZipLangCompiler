@@ -1,13 +1,7 @@
 
-snapshot: lts-24.11
+snapshot: lts-24.50
 
 packages:
 - .
-
-extra-deps:
-- foreign-0.2.1.0@sha256:3c4562ca607b8aa7962b00768a0dd0d5cf52fe0662b586bb44d300cfb3238634,2471
-
-
-allow-newer: true
 
 

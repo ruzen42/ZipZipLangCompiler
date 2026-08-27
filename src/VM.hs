@@ -14,6 +14,7 @@ import Control.Monad.State
 import Control.Monad (when)
 import GHC.Generics (Generic)
 import Data.Binary (Binary)
+import qualified Data.Binary as BN 
 
 type VarName = Text
 
@@ -49,13 +50,14 @@ instance Binary Instruction
 instance Binary Value
 instance Binary Arg
 
-instance Binary a => Binary (Vector a) where
-  put v = do
-    put (V.length v)
-    V.mapM_ put v
-  get = do
-    n <- get
-    V.replicateM n get
+instance BN.Binary a => BN.Binary (V.Vector a) where
+    put v = do
+        BN.put (V.length v)
+        V.mapM_ BN.put v
+
+    get = do
+        n <- BN.get
+        V.replicateM n BN.get
 
 initVM :: VMState
 initVM = VMState
